@@ -1,0 +1,23 @@
+{
+  "name": "agentic-web-app",
+  "customizations": {
+    "codespaces": {
+      "openFiles": []
+    },
+    "vscode": {
+      "settings": {
+        "workbench.startupEditor": "none"
+      }
+    }
+  },
+  "postCreateCommand": "echo 'Run: bash start_servers.sh'",
+  "portsAttributes": {
+    "5173": {
+      "label": "Agentic Web App",
+      "onAutoForward": "openBrowser"
+    }
+  },
+  "remoteEnv": {
+    "CLAUDE_CODE_IDE_SKIP_AUTO_INSTALL": "1"
+  }
+}

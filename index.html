@@ -1,13 +1,192 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>agentic-web-app</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Will You Be My Master?</title>
+
+<style>
+body{
+  margin:0;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:linear-gradient(135deg,#f8fafc,#e2e8f0);
+  font-family:system-ui, -apple-system, sans-serif;
+  overflow:hidden;
+}
+
+.container{
+  text-align:center;
+}
+
+h1{
+  font-size:clamp(24px,3vw,40px);
+  margin-bottom:30px;
+}
+
+.buttons{
+  position:relative;
+  width:300px;
+  height:160px;
+  margin:0 auto;
+}
+
+button{
+  padding:12px 22px;
+  border:none;
+  border-radius:999px;
+  font-weight:bold;
+  font-size:16px;
+  cursor:pointer;
+  position:absolute;
+}
+
+.yes{
+  background:black;
+  color:white;
+  left:50px;
+  bottom:20px;
+}
+
+.no{
+  background:white;
+  border:1px solid #999;
+  color:black;
+  left:160px;
+  bottom:20px;
+}
+
+.message{
+  margin-top:20px;
+  font-size:22px;
+  font-weight:bold;
+  display:none;
+}
+
+canvas{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="confetti"></canvas>
+
+<div class="container">
+  <h1>Will you be my master? 💍💍</h1>
+
+  <div class="buttons" id="arena">
+    <button class="yes" id="yesBtn">Yes</button>
+    <button class="no" id="noBtn">No</button>
+  </div>
+
+  <div class="message" id="message"></div>
+</div>
+
+<script>
+const arena = document.getElementById("arena");
+const noBtn = document.getElementById("noBtn");
+const yesBtn = document.getElementById("yesBtn");
+const message = document.getElementById("message");
+
+let pos={x:160,y:20};
+let velocity={x:3,y:-2};
+const padding=10;
+const fleeRadius=120;
+
+/* ==== 도망 + 벽 튕김 ==== */
+function update(){
+  pos.x+=velocity.x;
+  pos.y+=velocity.y;
+
+  const rect=arena.getBoundingClientRect();
+  const btnRect=noBtn.getBoundingClientRect();
+
+  if(pos.x<=padding || pos.x>=rect.width-btnRect.width-padding){
+    velocity.x*=-1;
+  }
+  if(pos.y<=padding || pos.y>=rect.height-btnRect.height-padding){
+    velocity.y*=-1;
+  }
+
+  noBtn.style.transform=`translate(${pos.x}px,${-pos.y}px)`;
+  requestAnimationFrame(update);
+}
+update();
+
+arena.addEventListener("pointermove",(e)=>{
+  const rect=noBtn.getBoundingClientRect();
+  const dx=rect.left+rect.width/2-e.clientX;
+  const dy=rect.top+rect.height/2-e.clientY;
+  const dist=Math.hypot(dx,dy);
+
+  if(dist<fleeRadius){
+    velocity.x+=dx*0.05;
+    velocity.y+=dy*0.05;
+  }
+});
+
+/* ==== Yes 클릭 ==== */
+yesBtn.addEventListener("click",()=>{
+  message.style.display="block";
+  message.innerHTML="🎉🥳🎊 Congratulations! 🥳🎉";
+  launchConfetti();
+});
+
+/* ==== No 클릭 ==== */
+noBtn.addEventListener("click",()=>{
+  message.style.display="block";
+  message.innerHTML="Try again.";
+});
+
+/* ==== Confetti ==== */
+const canvas=document.getElementById("confetti");
+const ctx=canvas.getContext("2d");
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+let particles=[];
+
+function launchConfetti(){
+  for(let i=0;i<150;i++){
+    particles.push({
+      x:window.innerWidth/2,
+      y:window.innerHeight/2,
+      vx:(Math.random()-0.5)*8,
+      vy:(Math.random()-0.5)*8,
+      size:Math.random()*6+3,
+      life:100
+    });
+  }
+  animateConfetti();
+}
+
+function animateConfetti(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles.forEach((p,index)=>{
+    p.x+=p.vx;
+    p.y+=p.vy;
+    p.vy+=0.05;
+    p.life--;
+
+    ctx.fillStyle=`hsl(${Math.random()*360},100%,50%)`;
+    ctx.fillRect(p.x,p.y,p.size,p.size);
+
+    if(p.life<=0){
+      particles.splice(index,1);
+    }
+  });
+
+  if(particles.length>0){
+    requestAnimationFrame(animateConfetti);
+  }
+}
+</script>
+
+</body>
 </html>
